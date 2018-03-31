@@ -16,7 +16,7 @@ class bareos::client(
 ) inherits ::bareos {
   include ::bareos::client::client
 
-  if $manage_package {
+  if $manage_package and $::osfamily != 'Gentoo' {
     package { $package_name:
       ensure => $package_ensure,
       tag    => 'bareos',

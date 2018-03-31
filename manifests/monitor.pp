@@ -11,7 +11,7 @@ class bareos::monitor(
   $config_dir     = "${::bareos::config_dir}/tray-monitor.d"
 ) inherits ::bareos {
 
-  if $manage_package {
+  if $manage_package and $::osfamily != 'Gentoo' {
     package { $package_name:
       ensure => $package_ensure,
       tag    => 'bareos',

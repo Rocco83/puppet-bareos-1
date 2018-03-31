@@ -47,8 +47,6 @@ class bareos::params {
   # base
   $manage_repo = true
   $manage_user = true
-  # base/common package
-  $package_name = 'bareos-common'
 
   # defaults for the different services and base/common package
   $manage_package = true
@@ -57,34 +55,48 @@ class bareos::params {
   $service_ensure = running
   $service_enable = true
 
-  # service/package specific
-  # bconsole
-  $console_package_name = 'bareos-bconsole'
+  # base/common package
+  if $::osfamily == 'Gentoo' {
+    $package_name = 'bareos'
+    $console_package_name = []
+    $monitor_package_name = []
+    $director_package_name = []
+    $client_package_name = []
+    $storage_package_name = []
+    $webui_package_name = []
+  } else {
+    $package_name = 'bareos-common'
 
-  # monitor
-  $monitor_package_name = 'bareos-traymonitor'
-
-  # director
-  $director_package_name = [
-    'bareos-director',
-    'bareos-director-python-plugin',
-    'bareos-database-common',
-    'bareos-database-mysql',
-    'bareos-database-postgresql',
-    'bareos-database-sqlite3',
-    'bareos-database-tools',
-  ]
+    # package specific
+    # bconsole
+    $console_package_name = 'bareos-bconsole'
+  
+    # monitor
+    $monitor_package_name = 'bareos-traymonitor'
+  
+    # director
+    $director_package_name = [
+      'bareos-director',
+      'bareos-director-python-plugin',
+      'bareos-database-common',
+      'bareos-database-mysql',
+      'bareos-database-postgresql',
+      'bareos-database-sqlite3',
+      'bareos-database-tools',
+    ]
+  
+    # filedaemon/client
+    $client_package_name = ['bareos-filedaemon', 'bareos-filedaemon-python-plugin']
+  
+    # storage
+    $storage_package_name = ['bareos-storage', 'bareos-storage-python-plugin', 'bareos-tools']
+  
+    # webui
+    $webui_package_name = 'bareos-webui'
+  }
+  
   $director_service_name = 'bareos-dir'
-
-  # filedaemon/client
-  $client_package_name = ['bareos-filedaemon', 'bareos-filedaemon-python-plugin']
   $client_service_name = 'bareos-fd'
-
-  # storage
-  $storage_package_name = ['bareos-storage', 'bareos-storage-python-plugin', 'bareos-tools']
   $storage_service_name = 'bareos-sd'
-
-  # webui
-  $webui_package_name = 'bareos-webui'
   $webui_service_name = 'apache2'
 }

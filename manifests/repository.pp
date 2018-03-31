@@ -80,7 +80,7 @@ class bareos::repository(
           name     => 'bareos',
           baseurl  => $location,
           gpgcheck => '1',
-          gpgkey   => "${location}repodata/repomd.xml.key",
+          gpgkey   => "${location}/repodata/repomd.xml.key",
           priority => '1',
         }
       }
@@ -111,17 +111,19 @@ class bareos::repository(
       # no bareos repository
       # bareos is not yet marked as stable in Gentoo, we need to keyword it
       # latest version available is 16.2
-      if ($release == 'latest' or $release > '16.2' ) {
+      # As per https://bugs.gentoo.org/633800 >= of 16.2 is needed 
+      if ($release == 'latest' or $release >= '16.2' ) {
         $gentoorelease = '16.2'
       } else {
         $gentoorelease = '15.2'
       }
 
-      portage::package {'app-backup/bareos':
-        ensure           => present,
-        target           => 'puppet-bareos',
-        keywords         => ['~amd64', '~x86'],
-        keywords_version => "=${gentoorelease}*",
+      # the package installation is already performed elsewhere
+      package_keywords {'app-backup/bareos':
+        ensure   => present,
+        target   => 'puppet-bareos',
+        keywords => ['~amd64', '~x86'],
+        version  => "=${gentoorelease}*",
       }
     }
     default: {
