@@ -1,3 +1,5 @@
+require 'resolv'
+
 module Puppet::Parser::Functions
   newfunction(:bareos_settings, type: :rvalue, doc: <<-'ENDHEREDOC') do |args|
     Helper function to parse settings for bareos and return prepared lines for config file
@@ -9,24 +11,24 @@ module Puppet::Parser::Functions
         raise 'Invalid or incomplete setting' unless setting.length > 2 && setting.is_a?(Array)
         value_setting = setting[0] # value for this setting
         directive = setting[1] # Directive Keyword of this setting
-        type = setting[2] # bareos variable type
+        dirty_type = setting[2] # bareos variable type
         required = setting[3] # boolean, undef allowed or not
         indent = setting[4] || '  ' # Internally used, just for beatufying
 
-        raise 'Name of directive config key is invalid' unless directive =~ %r{^[a-zA-z ]+$}
+        raise 'Name of directive config key is invalid' unless directive =~ %r{^[a-zA-Z0-9 ]+$}
 
         # check array if allowed
-        values = if (%w[acl runscript].include?(type) || type =~ %r{[_-]list$}) && value_setting.is_a?(Array)
+        values = if (%w[acl runscript].include?(dirty_type) || dirty_type =~ %r{[_-]list$}) && value_setting.is_a?(Array)
                    value_setting
                  else
                    [value_setting]
                  end
-        type.gsub!(%r{([_-]list)$}, '')
+        type = dirty_type.gsub(%r{([_-]list)$}, '')
 
         values.each do |value|
           # ignore undef if not required
-          next if required == false && value == :undef
-          raise 'This directive is required, please set value' if value == :undef
+          next if required == false && (value == nil || value == :undef)
+          raise 'This directive is required, please set value' if (value == nil || value == :undef)
 
           # defaults:
           # quote value
@@ -47,7 +49,6 @@ module Puppet::Parser::Functions
           when 'name', 'res', 'resource'
             quote = true
             regex = %r{^[a-z][a-z0-9\.\-_ \$]{0,126}$}i
-          # @todo validate net-address for domain name or ip
           when 'acl', 'messages', 'type', 'string_noquote', 'schedule_run_command'
             raise 'Value need to be an string' unless value.is_a?(String)
           # type md5password is missleading, it is an plain password and not md5 hashed
@@ -67,6 +68,11 @@ module Puppet::Parser::Functions
             regex = %r{^(\d+|(\d+\W+(seconds|sec|s|minutes|min|hours|h|days|d|weeks|w|months|m|quarters|q|years|y)\W*)+)$}i
           when 'boolean', 'bit'
             value_in_array = %w[yes no on off true false]
+          when 'address'
+            raise 'Value need to be an string' unless value.is_a?(String)
+            # validate net-address for domain name or ip
+            regex_hostname = %r{^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$}i
+            raise 'Value needs to be an ip or host address' unless value =~ Resolv::IPv4::Regex or value =~ Resolv::IPv6::Regex or value =~ Regexp.compile(regex_hostname)
           when 'addresses'
             hash_separator = ' = '
             raise 'Please specify as Hash' unless value.is_a?(Hash)
@@ -128,7 +134,7 @@ module Puppet::Parser::Functions
           end
         end
       rescue => error
-        raise Puppet::ParseError, "bareos_parse_settings(): #{setting.inspect}: #{error}."
+        raise Puppet::ParseError, "bareos_settings(): #{setting.inspect}: #{error}."
       end
     end
 

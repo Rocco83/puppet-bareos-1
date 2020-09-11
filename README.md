@@ -1,7 +1,7 @@
 # Bareos Puppet Module
-[![Puppet Forge](http://img.shields.io/puppetforge/v/project0/bareos.svg)](https://forge.puppetlabs.com/project0/bareos)
-[![Puppet Forge score](https://img.shields.io/puppetforge/f/project0/bareos.svg)](https://forge.puppetlabs.com/project0/bareos)
-[![Build Status](https://travis-ci.org/Project0/puppet-bareos.svg?branch=master)](https://travis-ci.org/Project0/puppet-bareos)
+[![Puppet Forge](http://img.shields.io/puppetforge/v/voxpupuli/bareos.svg)](https://forge.puppetlabs.com/voxpupuli/bareos)
+[![Puppet Forge score](https://img.shields.io/puppetforge/f/voxpupuli/bareos.svg)](https://forge.puppetlabs.com/voxpupuli/bareos)
+[![Build Status](https://travis-ci.org/voxpupuli/puppet-bareos.svg?branch=master)](https://travis-ci.org/voxpupuli/puppet-bareos)
 
 #### Table of Contents
 
@@ -15,6 +15,7 @@
   1. [Monitor (Tray)](#monitor)
   1. [Storage](#storage)
   1. [Web UI](#webui)
+  1. [Hiera](#hiera)
 1. [Limitations - OS compatibility, etc.](#limitations)
 
 ## Description
@@ -393,9 +394,40 @@ Additional configuration is required on the **Director** server.
 }
 ```
 
+### Hiera
+Since define ressource are used in the module they can not be used directly via hiera. Execptions are ofcourse the three classes mentioned in [Reference](#reference).
+But there exist hashes for the configuration directives in the `bareos::director` and the `bareos::webui` classes which can be used via hiera.
+
+```
+classes:
+  - bareos::director
+bareos::director::director::name_director: 'example'
+bareos::director::director::password: 'foobar'
+bareos::director::catalogs:
+  'testing':
+    db_driver: 'postgresql'
+    db_name: 'test'
+bareos::director::clients:
+  'alice':
+    address: foo.bar
+    password: foobar
+bareos::director::jobs:
+  'backup-alice':
+    messages: testing
+    pool: testing
+    type: backup
+    client: alice
+    file_set: testing
+
+
+## Limitations
+
+This module is built upon and tested against the versions of Puppet listed in the metadata.json file (i.e. the listed compatible versions on the Puppet Forge).
+
+
 ## Repositories
 
-OS Limitations hardly depends on the availability of the bareos packages in the bareos [repository](http://download.bareos.org/bareos/release/) and the available release. Currently it has been tested on Ubuntu 14.04 and 16.04, CentOS 6 and Debian 8.
+OS Limitations hardly depends on the availability of the bareos packages in the bareos [repository](http://download.bareos.org/bareos/release/) and the available release. Currently it has been tested on Ubuntu 14.04 and 16.04.
 
 The Bareos repository is not meant to support all operating system releases. Each Bareos version will support a certain list of os. `$repo_avail_release` is meant to keep a full array of the supported os from upstream. If the os family and/or the release is not supported, it will be skipped.
 
@@ -411,7 +443,6 @@ An example of this hash may be the following
 This will make use of the repository only for RedHat 5 and 6, but all of the CentOS.
 
 
-## Limitations
+## Module Migration
 
-This module is built upon and tested against the versions of Puppet listed in the metadata.json file (i.e. the listed compatible versions on the Puppet Forge).
-
+This puppet module was originally hosted at https://github.com/Project0/puppet-bareos and has been migrated to Vox Pupuli.

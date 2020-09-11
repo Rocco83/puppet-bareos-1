@@ -167,12 +167,12 @@ define bareos::director::messages (
       [$console, 'Console', 'messages_list', false],
       [$director, 'Director', 'messages_list', false],
       [$file, 'File', 'messages_list', false],
-      [$mail, 'Mail', 'messages_list', false],
       [$mail_command, 'Mail Command', 'string', false],
+      [$mail, 'Mail', 'messages_list', false],
       [$mail_on_error, 'Mail On Error', 'messages_list', false],
       [$mail_on_success, 'Mail On Success', 'messages_list', false],
-      [$operator, 'Operator', 'messages_list', false],
       [$operator_command, 'Operator Command', 'string', false],
+      [$operator, 'Operator', 'messages_list', false],
       [$stderr, 'Stderr', 'messages_list', false],
       [$stdout, 'Stdout', 'messages_list', false],
       [$syslog, 'Syslog', 'messages_list', false],
@@ -182,10 +182,11 @@ define bareos::director::messages (
 
   file { "${::bareos::director::config_dir}/${_resource_dir}/${name}.conf":
     ensure  => $ensure,
-    mode    => $::bareos::file_mode,
-    owner   => $::bareos::file_owner,
-    group   => $::bareos::file_group,
+    mode    => $bareos::file_mode,
+    owner   => $bareos::file_owner,
+    group   => $bareos::file_group,
     content => template('bareos/resource.erb'),
-    notify  => Service[$::bareos::director::service_name],
+    notify  => Service[$bareos::director::service_name],
+    tag     => ['bareos', 'bareos_director'],
   }
 }

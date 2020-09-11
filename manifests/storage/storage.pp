@@ -427,7 +427,7 @@ class bareos::storage::storage (
   $ver_id = undef,
   $working_directory = undef,
 ) {
-  include ::bareos::storage
+  include bareos::storage
 
   $_resource = 'Storage'
   $_resource_dir = 'storage'
@@ -501,7 +501,7 @@ class bareos::storage::storage (
     $_require_resource = undef
   }
 
-  file { "${::bareos::storage::config_dir}/${_resource_dir}/${name_storage}.conf":
+  file { "${::bareos::storage::config_dir}/${_resource_dir}/bareos-sd.conf":
     ensure  => $ensure,
     mode    => $::bareos::file_mode,
     owner   => $::bareos::file_owner,
@@ -509,5 +509,6 @@ class bareos::storage::storage (
     content => template('bareos/resource.erb'),
     notify  => Service[$::bareos::storage::service_name],
     require => $_require_resource,
+    tag     => ['bareos', 'bareos_storage'],
   }
 }

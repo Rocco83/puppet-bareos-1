@@ -8,6 +8,7 @@ class bareos::repository(
   $release = 'latest',
   $repo_avail_hash = {},
   $repo_manage_hash = undef,
+  $gpg_key_fingerprint = undef,
 ) {
 
   $url = "http://download.bareos.org/bareos/release/${release}/"
@@ -26,6 +27,18 @@ class bareos::repository(
       $osmajrelease = split($osrelease, '.')
     }
   }
+
+
+  if $gpg_key_fingerprint {
+    $_gpg_key_fingerprint = $gpg_key_fingerprint
+  } elsif $release == 'latest' or versioncmp($release, '18.2') >= 0 {
+    # >= bareos-18.2
+    $_gpg_key_fingerprint = 'A0CF E15F 71F7 9857 4AB3 63DD 1182 83D9 A786 2CEE'
+  } else {
+    # >= bareos-15.2
+    $_gpg_key_fingerprint = '0143 857D 9CE8 C2D1 82FE 2631 F93C 028C 093B FBA2'
+  }
+
 
   # extract current array associated to the os release
   if ( has_key($repo_avail_hash, $os) ) {
@@ -66,16 +79,20 @@ class bareos::repository(
   #  ( $release in $repo_avail_hash[$os][$osmajrelease] or $release in $repo_avail_hash[$os][$osrelease] ) and
   #  ( ( $repo_manage_hash == undef ) or ( 'all' in $repo_manage_hash[$os] or $osmajrelease in $repo_manage_hash[$os] or $osrelease in $repo_manage_hash[$os] ) ) {
   case $os {
-    /(?i:redhat|centos|fedora)/: {
-      case $os {
-        'RedHat': {
-          $location = "${url}RHEL_${osmajrelease}"
-        }
-        'Centos': {
-          $location = "${url}CentOS_${osmajrelease}"
-        }
-        'Fedora': {
-          $location = "${url}Fedora_${osmajrelease}"
+      /(?i:redhat|centos|fedora|virtuozzolinux)/: {
+        case $os {
+          'RedHat', 'VirtuozzoLinux': {
+            $location = "${url}RHEL_${osmajrelease}"
+          }
+          'Centos': {
+            $location = "${url}CentOS_${osmajrelease}"
+          }
+          'Fedora': {
+            $location = "${url}Fedora_${osmajrelease}"
+          }
+          default: {
+            fail('Operatingsystem is not supported by this module')
+          }
         }
         default: {
           fail('Operatingsystem is not supported by this module')
@@ -106,7 +123,7 @@ class bareos::repository(
           release  => '/',
           repos    => '',
           key      => {
-            id     => '0143857D9CE8C2D182FE2631F93C028C093BFBA2',
+            id     => regsubst($_gpg_key_fingerprint, ' ', '', 'G'),
             source => "${location}/Release.key",
           },
         }

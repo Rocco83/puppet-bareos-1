@@ -42,6 +42,8 @@ class BareosResourceHelper
       val = '1337 sec'
     when 'boolean', 'bit'
       val = false
+    when 'address'
+      val = 'host.name.com'
     when 'addresses', 'include_exclude_item', 'runscript', 'hash'
       sep = ' ' unless type == 'addresses'
       val = {

@@ -32,8 +32,8 @@ describe 'bareos_settings' do
     end
   end
 
-  context 'type is a string' do
-    %w[acl messages type string_noquote schedule_run_command address].each do |type|
+  context 'type is a string without quotes' do
+    %w[acl messages type string_noquote schedule_run_command].each do |type|
       it 'runs with compatible values' do
         ['Not a number', 'MyString', '23 free usage of Text.!', 'Special ".-,= Chars'].each do |val|
           is_expected.to run.with_params([val, 'Test', type, true]).and_return("#{indent_default}Test = #{val}")
@@ -103,6 +103,21 @@ describe 'bareos_settings' do
       end
       it 'not runs with incompatible values' do
         [0, 1, 'true s', 'false s'].each do |val|
+          is_expected.not_to run.with_params([val, 'Test', type, true])
+        end
+      end
+    end
+  end
+
+  context 'type is a address' do
+    %w[address].each do |type|
+      it 'runs with compatible values' do
+        ['10.0.0.1', '88.120.0.4', '2001:22::f4', 'fd00:0000:0000:0000::1', 'fancy.domain.com', 'my.host.name.de'].each do |val|
+          is_expected.to run.with_params([val, 'Test', type, true]).and_return("#{indent_default}Test = #{val}")
+        end
+      end
+      it 'not runs with incompatible values' do
+        [0, true, { 'hash' => 'val' }, 'ff01::1::2', 'my domain com', ' invalid,char.com'].each do |val|
           is_expected.not_to run.with_params([val, 'Test', type, true])
         end
       end

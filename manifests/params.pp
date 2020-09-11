@@ -51,10 +51,12 @@ class bareos::params {
   # defaults for the different services and base/common package
   $manage_package = true
   $manage_service = true
+  $manage_database = true
   $package_ensure = present
   $service_ensure = running
   $service_enable = true
 
+  # package specific
   # base/common package
   if $::osfamily == 'Gentoo' {
     $package_name = 'bareos'
@@ -67,7 +69,6 @@ class bareos::params {
   } else {
     $package_name = 'bareos-common'
 
-    # package specific
     # bconsole
     $console_package_name = 'bareos-bconsole'
   
@@ -84,19 +85,39 @@ class bareos::params {
       'bareos-database-sqlite3',
       'bareos-database-tools',
     ]
-  
+
     # filedaemon/client
     $client_package_name = ['bareos-filedaemon', 'bareos-filedaemon-python-plugin']
   
     # storage
     $storage_package_name = ['bareos-storage', 'bareos-storage-python-plugin', 'bareos-tools']
-  
+
     # webui
     $webui_package_name = 'bareos-webui'
   }
-  
+
+  # service specific
+  # director
   $director_service_name = 'bareos-dir'
+  $director_managed_dirs = [ 'catalog',
+                            'client',
+                            'console',
+                            'counter',
+                            'director',
+                            'fileset',
+                            'job',
+                            'jobdefs',
+                            'messages',
+                            'pool',
+                            'profile',
+                            'schedule',
+                            'storage',
+                          ]
+
+  # filedaemon/client
   $client_service_name = 'bareos-fd'
+  # storage
   $storage_service_name = 'bareos-sd'
+  # webui
   $webui_service_name = 'apache2'
 }

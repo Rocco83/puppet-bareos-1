@@ -19,6 +19,7 @@ class bareos (
   $manage_user      = $::bareos::params::manage_user,
   $manage_package   = $::bareos::params::manage_package,
   $manage_service   = $::bareos::params::manage_service,
+  $manage_database  = $::bareos::params::manage_database,
   $package_name     = $::bareos::params::package_name, # base/common package only
   $package_ensure   = $::bareos::params::package_ensure,
   $service_ensure   = $::bareos::params::service_ensure,
@@ -28,6 +29,7 @@ class bareos (
   $monitor_package_name  = $::bareos::params::monitor_package_name,
   $director_package_name = $::bareos::params::director_package_name,
   $director_service_name = $::bareos::params::director_service_name,
+  $director_managed_dirs = $::bareos::params::director_managed_dirs,
   $client_package_name   = $::bareos::params::client_package_name,
   $client_service_name   = $::bareos::params::client_service_name,
   $storage_package_name  = $::bareos::params::storage_package_name,
@@ -45,7 +47,7 @@ class bareos (
   if $manage_package {
     package { $package_name:
       ensure => $package_ensure,
-      tag    => 'bareos',
+      tag    => ['bareos', 'bareos_core'],
     }
   }
 
@@ -54,6 +56,7 @@ class bareos (
       ensure     => present,
       forcelocal => true,
       system     => true,
+      tag        => ['bareos', 'bareos_core'],
     }
     -> user { $file_owner:
       ensure     => present,
@@ -63,16 +66,18 @@ class bareos (
       shell      => '/bin/false',
       groups     => ['disk', 'tape', $file_group],
       system     => true,
+      tag        => ['bareos', 'bareos_core'],
     }
   }
 
   file { $config_dir:
-    ensure  => directory,
-    purge   => true,
-    recurse => true,
-    force   => true,
-    mode    => $::bareos::file_dir_mode,
-    owner   => $::bareos::file_owner,
-    group   => $::bareos::file_group,
+    ensure       => directory,
+    purge        => true,
+    recurse      => true,
+    recurselimit => 1,
+    mode         => $::bareos::file_dir_mode,
+    owner        => $::bareos::file_owner,
+    group        => $::bareos::file_group,
+    tag          => ['bareos', 'bareos_core'],
   }
 }
