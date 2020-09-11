@@ -79,20 +79,16 @@ class bareos::repository(
   #  ( $release in $repo_avail_hash[$os][$osmajrelease] or $release in $repo_avail_hash[$os][$osrelease] ) and
   #  ( ( $repo_manage_hash == undef ) or ( 'all' in $repo_manage_hash[$os] or $osmajrelease in $repo_manage_hash[$os] or $osrelease in $repo_manage_hash[$os] ) ) {
   case $os {
-      /(?i:redhat|centos|fedora|virtuozzolinux)/: {
-        case $os {
-          'RedHat', 'VirtuozzoLinux': {
-            $location = "${url}RHEL_${osmajrelease}"
-          }
-          'Centos': {
-            $location = "${url}CentOS_${osmajrelease}"
-          }
-          'Fedora': {
-            $location = "${url}Fedora_${osmajrelease}"
-          }
-          default: {
-            fail('Operatingsystem is not supported by this module')
-          }
+    /(?i:redhat|centos|fedora|virtuozzolinux)/: {
+      case $os {
+        'RedHat', 'VirtuozzoLinux': {
+          $location = "${url}RHEL_${osmajrelease}"
+        }
+        'Centos': {
+          $location = "${url}CentOS_${osmajrelease}"
+        }
+        'Fedora': {
+          $location = "${url}Fedora_${osmajrelease}"
         }
         default: {
           fail('Operatingsystem is not supported by this module')
